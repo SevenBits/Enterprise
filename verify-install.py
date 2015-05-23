@@ -40,7 +40,7 @@ def main():
 	installValid = True
 	reason = ""
 
-	configIsValid = verifyConfigurationFile("efi/boot/.MLUL-Live-USB")
+	configIsValid = verifyConfigurationFile("efi/boot/.MLUL-Live-USB") or verifyConfigurationFile("efi/boot/enterprise.cfg")
 	## Check if the Enterprise files are present.
 	if ( not fileExists("efi/boot/boot.efi") or
 		 not fileExists("efi/boot/bootX64.efi")
