@@ -22,9 +22,6 @@
 #ifndef _distribution_h
 #define _distribution_h
 
-#define PRESET_OPTIONS_SIZE 20
-extern bool preset_options_array[PRESET_OPTIONS_SIZE];
-
 CHAR8* KernelLocationForDistributionName(CHAR8 *, OUT CHAR8 **);
 CHAR8* InitRDLocationForDistributionName(CHAR8 *);
 

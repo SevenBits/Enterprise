@@ -25,7 +25,7 @@ CHAR8* KernelLocationForDistributionName(CHAR8 *name, OUT CHAR8 **boot_folder) {
 	if (strcmpa((CHAR8 *)"Debian", name) == 0) {
 		*boot_folder = (CHAR8 *)"live";
 		return (CHAR8 *)"/live/vmlinuz";
-	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0 || strcmpa((CHAR8 *)"Mint", name) == 0) {
+	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0) {
 		*boot_folder = (CHAR8 *)"casper";
 		return (CHAR8 *)"/casper/vmlinuz.efi";
 	} else {
@@ -36,7 +36,7 @@ CHAR8* KernelLocationForDistributionName(CHAR8 *name, OUT CHAR8 **boot_folder) {
 CHAR8* InitRDLocationForDistributionName(CHAR8 *name) {
 	if (strcmpa((CHAR8 *)"Debian", name) == 0) {
 		return (CHAR8 *)"/live/initrd.img";
-	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0 || strcmpa((CHAR8 *)"Mint", name) == 0) {
+	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0) {
 		return (CHAR8 *)"/casper/initrd.lz";
 	} else {
 		return (CHAR8 *)"";

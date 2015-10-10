@@ -3,9 +3,11 @@ Enterprise
 [![Build Status](https://travis-ci.org/SevenBits/Enterprise.png)](https://travis-ci.org/SevenBits/Enterprise)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/SevenBits/enterprise/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-This source code archive contains code for Enterprise, a custom UEFI bootloader designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on Apple Macintosh computers. It is designed to compliment [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), though it can also be used separately (albeit with some setup work). The purpose of Enterprise is as the first stage in a two-stage booting process for Mac Linux USB Loader-created USB drives. Essentially, Enterprise loads GRUB, giving it configuration settings and the location of necessary files inside of the desired ISO, and then the distribution is booted.
+This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
 
-Enterprise now supports booting multiple distributions, so you can have more than one distribution per USB stick. This way, you can test out multiple distributions.
+Enterprise supports booting multiple distributions, so you can have more than one distribution per USB stick and multiple configurations for each distribution.
+
+Enterprise requires a configuration file telling it about which distributions it should load. This configuration file is created automatically when you use tools like [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), though it is possible to write your own file and configure Enterprise as one would configure other boot managers such as GRUB, gummiboot, and syslinux, albeit much more simply.
 
 Now, with that out the way (phew!), let's get to the interesting stuff, shall we?
 

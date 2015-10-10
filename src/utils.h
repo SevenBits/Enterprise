@@ -32,6 +32,7 @@ CHAR8* strcata(CHAR8 *, const CHAR8 *);
 INTN strposa(const CHAR8 *, char);
 
 INTN NarrowToLongCharConvert(CHAR8 *InChar, OUT CHAR16 *);
+CHAR8* PathConvert(CHAR8, CHAR8 *);
 CHAR16* ASCIItoUTF16(CHAR8 *, UINTN);
 CHAR8* UTF16toASCII(CHAR16 *, UINTN);
 
@@ -40,5 +41,6 @@ UINTN FileRead(EFI_FILE_HANDLE, const CHAR16 *, CHAR8 **);
 CHAR8* GetConfigurationKeyAndValue(CHAR8 *, UINTN *, CHAR8 **, CHAR8 **);
 VOID DisplayColoredText(CHAR16 *);
 VOID DisplayErrorText(CHAR16 *);
+EFI_STATUS ReadStringFromKeyboard(OUT CHAR16 **);
 
 #endif

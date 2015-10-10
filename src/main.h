@@ -26,14 +26,16 @@
 #define EFI_1_10_SYSTEM_TABLE_REVISION ((1<<16) | (10))
 #define EFI_1_02_SYSTEM_TABLE_REVISION ((1<<16) | (02))
 
-#define banner L"Welcome to Enterprise! - Version %d.%d.%d\n"
+#define PRESET_OPTIONS_SIZE 20
+
+extern CHAR16 *banner;
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 3
-#define VERSION_PATCH 0
+#define VERSION_PATCH 1
 
 #define AllocateMemoryAndCopyChar8String(dest, src) \
 	if (dest) FreePool(dest); dest = NULL; \
-	dest = AllocatePool(sizeof(CHAR8) * strlena(src)); \
+	dest = AllocatePool(sizeof(CHAR8) * (strlena(src) + 1)); \
 	strcpya(dest, src); \
 
 typedef struct LinuxBootOption {
@@ -58,6 +60,7 @@ extern const EFI_GUID enterprise_variable_guid;
 extern const EFI_GUID grub_variable_guid;
 
 extern UINTN numberOfDisplayRows, numberOfDisplayColoumns, highestModeNumberAvailable;
+extern BOOLEAN preset_options_array[PRESET_OPTIONS_SIZE];
 
 extern BootableLinuxDistro *distributionListRoot;
 

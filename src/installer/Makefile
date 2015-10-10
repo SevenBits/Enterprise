@@ -16,7 +16,7 @@
  #
  #
 CC=cc
-CFLAGS=-c -Wall -Werror -std=c99
+CFLAGS=-c -Wall -pedantic -Werror -std=c11
 LDFLAGS=
 SOURCES=main.c
 OBJECTS=$(SOURCES:.cpp=.o)

@@ -83,29 +83,62 @@ VOID DisplayErrorText(CHAR16 *string) {
 }
 
 #ifdef __APPLE__
+	#pragma mark - Text input functions
+#endif
+EFI_STATUS ReadStringFromKeyboard(OUT CHAR16 **outString) {
+	/* We allocate the memory in this function; it should not be allocated prior to being
+	 * called. */
+	EFI_STATUS err = EFI_SUCCESS;
+	const UINT32 inputLength = 1024;
+	UINT32 charactersEntered = 0;
+	*outString = AllocateZeroPool(sizeof(CHAR16) * (inputLength + 1));
+	
+	CHAR16 key = 0;
+	while (key != 13) {
+		EFI_INPUT_KEY inputKey;
+		err = uefi_call_wrapper(ST->ConIn->ReadKeyStroke, 2, ST->ConIn, &inputKey);
+		if (err != EFI_NOT_READY) {
+			key = inputKey.UnicodeChar;
+			
+			if (!(key < 0x20 || key > 127)) {
+				CHAR16 tempStr[2] = {key, '\0'};
+				StrCat(*outString, tempStr);
+				charactersEntered++;
+				
+				Print(L"%s", tempStr);
+			}
+		}
+		
+		// The user can't overflow the input buffer.
+		if (charactersEntered == inputLength) break;
+	}
+	
+	if (StrLen(*outString) > 0) StrCat(*outString, L" ");
+	Print(L"\n");
+	return err;
+}
+
+#ifdef __APPLE__
 	#pragma mark - Character conversion functions missing from GNU-EFI
 #endif
 CHAR8* strcpya(CHAR8 *target, const CHAR8 *source) {
-	int i;
-
-	for(i = 0; source[i] != '\0'; ++i)
-		target[i] = source[i];
-	target[i] = source[i];
-
+	while ((*target++ = *source++));
 	return target;
 }
 
 CHAR8* strncpya(CHAR8 *target, const CHAR8 *source, INTN n) {
-	CHAR8 *dst = target;
-	const CHAR8 *src = source;
-	while (n > 0) {
-		n--;
-		if ((*dst++ = *src++) == '\0') {
-			SetMem(dst, n, '\0');
-			break;
-		}
+	INTN i = 0;
+
+	// Copy all of the characters in the string up to the desired length.
+	for (i = 0; i < n && source[i] != '\0'; i++) {
+		target[i] = source[i];
 	}
-	
+
+	// Pad the remainder of the string with null characters per the standard.
+	for ( ; i < n; i++) {
+		target[i] = '\0';
+	}
+
 	return target;
 }
 
@@ -222,6 +255,21 @@ INTN NarrowToLongCharConvert(CHAR8 *InString, CHAR16 *c) {
 
 	*c = unichar;
 	return len;
+}
+
+/**
+ * Converts between different path formats. This is a very rudimentary search and does not work
+ * correctly if there is more than one type of path separator in a string.
+ */
+CHAR8* PathConvert(CHAR8 needle, CHAR8 *path) {
+	// Iterate through path, replacing all path separators with needle.
+	for (INTN i = 0; path[i] != '\0'; i++) {
+		if (path[i] == '/' || path[i] == '\\' || path[i] == ':') {
+			path[i] = needle;
+		}
+	}
+	
+	return path;
 }
 
 BOOLEAN FileExists(EFI_FILE_HANDLE dir, CHAR16 *name) {

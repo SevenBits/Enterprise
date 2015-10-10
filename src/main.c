@@ -33,6 +33,7 @@ static void ReadConfigurationFile(const CHAR16 *);
 static EFI_STATUS console_text_mode(VOID);
 static EFI_STATUS SetupDisplay(VOID);
 UINTN numberOfDisplayRows, numberOfDisplayColoumns, highestModeNumberAvailable = 0;
+CHAR16 *banner = L"Welcome to Enterprise! - Version %d.%d.%d\n";
 
 EFI_LOADED_IMAGE *this_image = NULL;
 static EFI_FILE *root_dir;
@@ -47,8 +48,8 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	
 	InitializeLib(image_handle, systab); // Initialize EFI.
 	console_text_mode(); // Put the console into text mode. If we don't do that, the image of the Apple
-						// boot manager will remain on the screen and the user won't see any output
-						// from the program.
+	                     // boot manager will remain on the screen and the user won't see any output
+	                     // from the program.
 	SetupDisplay();
 	global_image = image_handle;
 	
@@ -67,10 +68,8 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	}
 	
 	/* Setup global variables. */
-	INT32 i;
-	for (i = 0; i < PRESET_OPTIONS_SIZE; i++) {
-		preset_options_array[i] = 0; // We don't *need* to initalize, but do it anyway.
-	}
+	// Set all present options to be false (i.e off).
+	SetMem(preset_options_array, PRESET_OPTIONS_SIZE * sizeof(BOOLEAN), 0);
 	
 	/* Print the welcome message. */
 	uefi_call_wrapper(ST->ConOut->SetAttribute, 2, ST->ConOut, EFI_LIGHTGRAY|EFI_BACKGROUND_BLACK); // Set the text color.
@@ -82,24 +81,29 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	BOOLEAN can_continue = TRUE;
 	
 	/* Check to make sure that we have our configuration file and GRUB bootloader. */
-	if (!FileExists(root_dir, L"\\efi\\boot\\.MLUL-Live-USB")) {
-		DisplayErrorText(L"Error: can't find configuration file.\n");
-		can_continue = FALSE;
-	} else {
-		ReadConfigurationFile(L"\\efi\\boot\\.MLUL-Live-USB");
-		if (!distributionListRoot) {
-			DisplayErrorText(L"Error: configuration file parsing error.\n");
+	if (!FileExists(root_dir, L"\\efi\\boot\\enterprise.cfg")) {
+		// Check if we have an old-style configuration file instead.
+		
+		if (!FileExists(root_dir, L"\\efi\\boot\\.MLUL-Live-USB")) {
+			DisplayErrorText(L"Error: can't find configuration file.\n");
 			can_continue = FALSE;
+		} else {
+			DisplayErrorText(L"Warning: old-style configuration file found, please upgrade to the new format\n");
+			ReadConfigurationFile(L"\\efi\\boot\\.MLUL-Live-USB");
 		}
+	} else {
+		ReadConfigurationFile(L"\\efi\\boot\\enterprise.cfg");
 	}
 	
+	// Verify if the configuration file is valid.
+	if (!distributionListRoot) {
+		DisplayErrorText(L"Error: configuration file parsing error.\n");
+		can_continue = FALSE;
+	}
+	
+	// Check for GRUB.
 	if (!FileExists(root_dir, L"\\efi\\boot\\boot.efi")) {
 		DisplayErrorText(L"Error: can't find GRUB bootloader!.\n");
-		can_continue = FALSE;
-	}
-	
-	if (!FileExists(root_dir, L"\\efi\\boot\\boot.iso")) {
-		DisplayErrorText(L"Error: can't find ISO file to boot!.\n");
 		can_continue = FALSE;
 	}
 	
@@ -126,14 +130,14 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 
 static EFI_STATUS SetupDisplay(VOID) {
 	// Set the display to use the highest available resolution.
-	EFI_STATUS err;
+	EFI_STATUS err = EFI_SUCCESS;
 	
-	do {
+	while (!EFI_ERROR(err)) {
 		err = uefi_call_wrapper(ST->ConOut->QueryMode, 4, ST->ConOut, highestModeNumberAvailable, &numberOfDisplayRows, &numberOfDisplayColoumns);
 		Print(L"Detected mode %d: %d x %d.\n", highestModeNumberAvailable, numberOfDisplayRows, numberOfDisplayColoumns);
 		
-		highestModeNumberAvailable++;
-	} while (err == EFI_SUCCESS);
+		if (!EFI_ERROR(err)) highestModeNumberAvailable++;
+	}
 	
 	Print(L"Setting display to be in mode %d.\n", highestModeNumberAvailable - 1);
 	err = uefi_call_wrapper(ST->ConOut->SetMode, 2, ST->ConOut, highestModeNumberAvailable - 1);
@@ -228,6 +232,7 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 	UINTN read_bytes = FileRead(root_dir, name, &contents);
 	if (read_bytes == 0) {
 		DisplayErrorText(L"Error: Couldn't read configuration information.\n");
+		return;
 	}
 	
 	UINTN position = 0;
@@ -243,7 +248,7 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 			new->bootOption = AllocateZeroPool(sizeof(LinuxBootOption));
 			AllocateMemoryAndCopyChar8String(new->bootOption->name, value);
 			AllocateMemoryAndCopyChar8String(new->bootOption->iso_path, (CHAR8 *)"boot.iso"); // Set a default value.
-				
+			
 			conductor->next = new;
 			new->next = NULL;
 			conductor = conductor->next; // subsequent operations affect the new link in the chain
@@ -269,18 +274,25 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 		// The user is manually specifying information; override any previous values.
 		} else if (strcmpa((CHAR8 *)"kernel", key) == 0) {
 			if (strposa(value, ' ') != -1) {
-				// There's a space after the kernel name; the user has given us additional kernel parameters.
-				// Separate the kernel path and options and copy them into their respective positions in the
-				// boot options struct.
+				/*
+				 * There's a space after the kernel name; the user has given us additional kernel parameters.
+				 * Separate the kernel path and options and copy them into their respective positions in the
+				 * boot options struct.
+				 */
+				// Initialize variables and free memory that we might be overwriting soon.
 				INTN spaceCharPos = strposa(value, ' ');
+				INTN kernelStringLength = sizeof(CHAR8) * spaceCharPos;
 				if (conductor->bootOption->kernel_path) FreePool(conductor->bootOption->kernel_path);
 				conductor->bootOption->kernel_path = NULL;
-				
-				conductor->bootOption->kernel_path = AllocatePool(sizeof(CHAR8) * spaceCharPos);
+
+				// Allocate memory and begin the copy.
+				conductor->bootOption->kernel_path = AllocatePool(kernelStringLength + 1); // +1 is for null terminator
 				strncpya(conductor->bootOption->kernel_path, value, spaceCharPos);
+				*(conductor->bootOption->kernel_path + kernelStringLength) = '\0';
 				//Print(L"conductor->bootOption->kernel_path = %a\n", conductor->bootOption->kernel_path);
-				
-				CHAR8 *params = value + spaceCharPos + 1;
+
+				// Begin dealing with the kernel parameters and copy them too.
+				CHAR8 *params = value + spaceCharPos + 1; // Start the copy just past the space character
 				AllocateMemoryAndCopyChar8String(conductor->bootOption->kernel_options, params);
 				//Print(L"conductor->bootOption->kernel_options = %a\n", conductor->bootOption->kernel_options);
 			} else {
@@ -290,6 +302,12 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 			AllocateMemoryAndCopyChar8String(conductor->bootOption->initrd_path, value);
 		} else if (strcmpa((CHAR8 *)"iso", key) == 0) {
 			strcpya(conductor->bootOption->iso_path, value);
+			
+			CHAR16 *temp = ASCIItoUTF16(value, strlena(value));
+			if (!FileExists(root_dir, temp)) {
+				Print(L"Warning: ISO file %a not found.\n", value);
+			}
+			FreePool(temp);
 		} else if (strcmpa((CHAR8 *)"root", key) == 0) {
 			AllocateMemoryAndCopyChar8String(conductor->bootOption->boot_folder, value);
 		} else {
@@ -297,6 +315,7 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 		}
 	}
 	
+	FreePool(contents);
 	//Print(L"Done reading configuration file.\n");
 }
 
