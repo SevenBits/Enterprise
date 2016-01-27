@@ -24,7 +24,7 @@
 #ifdef __APPLE__
 	#pragma mark - Get/Set/Delete EFI variables
 #endif
-EFI_STATUS efi_set_variable(const EFI_GUID *vendor, CHAR16 *name, CHAR8 *buf, UINTN size, BOOLEAN persistent) {
+EFI_STATUS efi_set_variable(const EFI_GUID * const vendor, CHAR16 *name, CHAR8 *buf, UINTN size, BOOLEAN persistent) {
 	UINT32 flags;
 	
 	flags = EFI_VARIABLE_BOOTSERVICE_ACCESS|EFI_VARIABLE_RUNTIME_ACCESS;
@@ -35,7 +35,7 @@ EFI_STATUS efi_set_variable(const EFI_GUID *vendor, CHAR16 *name, CHAR8 *buf, UI
 	return uefi_call_wrapper(RT->SetVariable, 5, name, (EFI_GUID *)vendor, flags, size, buf);
 }
 
-EFI_STATUS efi_delete_variable(const EFI_GUID *vendor, CHAR16 *name) {
+EFI_STATUS efi_delete_variable(const EFI_GUID * const vendor, CHAR16 *name) {
 	UINT32 flags;
 	UINTN size = 0;
 	
@@ -43,7 +43,7 @@ EFI_STATUS efi_delete_variable(const EFI_GUID *vendor, CHAR16 *name) {
 	return uefi_call_wrapper(RT->SetVariable, 5, name, (EFI_GUID *)vendor, flags, size, NULL);
 }
 
-EFI_STATUS efi_get_variable(const EFI_GUID *vendor, CHAR16 *name, CHAR8 **buffer, UINTN *size) {
+EFI_STATUS efi_get_variable(const EFI_GUID *const vendor, CHAR16 *name, CHAR8 **buffer, UINTN *size) {
 	CHAR8 *buf;
 	UINTN length;
 	EFI_STATUS err;
@@ -121,12 +121,12 @@ EFI_STATUS ReadStringFromKeyboard(OUT CHAR16 **outString) {
 #ifdef __APPLE__
 	#pragma mark - Character conversion functions missing from GNU-EFI
 #endif
-CHAR8* strcpya(CHAR8 *target, const CHAR8 *source) {
+CHAR8* strcpya(CHAR8 *target, const CHAR8 * source) {
 	while ((*target++ = *source++));
 	return target;
 }
 
-CHAR8* strncpya(CHAR8 *target, const CHAR8 *source, INTN n) {
+CHAR8* strncpya(CHAR8 *target, const CHAR8 * const source, INTN n) {
 	INTN i = 0;
 
 	// Copy all of the characters in the string up to the desired length.
@@ -142,7 +142,7 @@ CHAR8* strncpya(CHAR8 *target, const CHAR8 *source, INTN n) {
 	return target;
 }
 
-CHAR8* strcata(CHAR8 *dest, const CHAR8 *src) {
+CHAR8* strcata(CHAR8 *dest, const CHAR8 * src) {
 	CHAR8 *rdest = dest;
 	
 	while (*dest) {
@@ -153,7 +153,7 @@ CHAR8* strcata(CHAR8 *dest, const CHAR8 *src) {
 	return rdest;
 }
 
-CHAR8* strchra(const CHAR8 *s, int c) {
+CHAR8* strchra(const CHAR8 * s, int c) {
 	while (*s != (char)c) {
 		if (!*s++) {
 			return NULL;
@@ -163,7 +163,7 @@ CHAR8* strchra(const CHAR8 *s, int c) {
 	return (CHAR8 *)s;
 }
 
-INTN strposa(const CHAR8 *str, char c) {
+INTN strposa(const CHAR8 * const str, char c) {
 	CHAR8 *p = strchra(str, c);
 	return p ? p - str : -1;
 }
@@ -290,7 +290,7 @@ out:
 #ifdef __APPLE__
 	#pragma mark - Functions for reading and parsing config files.
 #endif
-UINTN FileRead(EFI_FILE_HANDLE dir, const CHAR16 *name, CHAR8 **content) {
+UINTN FileRead(EFI_FILE_HANDLE dir, const CHAR16 * const name, CHAR8 **content) {
 	EFI_FILE_HANDLE handle;
 	EFI_FILE_INFO *info;
 	CHAR8 *buf;

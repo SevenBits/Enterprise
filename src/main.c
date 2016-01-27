@@ -28,7 +28,7 @@
 const EFI_GUID enterprise_variable_guid = {0xd92996a6, 0x9f56, 0x48fc, {0xc4, 0x45, 0xb9, 0x0f, 0x23, 0x98, 0x6d, 0x4a}};
 const EFI_GUID grub_variable_guid = {0x8BE4DF61, 0x93CA, 0x11d2, {0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B,0x8C}};
 
-static void ReadConfigurationFile(const CHAR16 *);
+static void ReadConfigurationFile(const CHAR16 const *);
 
 static EFI_STATUS console_text_mode(VOID);
 static EFI_STATUS SetupDisplay(VOID);
@@ -220,7 +220,7 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 	return EFI_SUCCESS;
 }
 
-static void ReadConfigurationFile(const CHAR16 *name) {
+static void ReadConfigurationFile(const CHAR16 * const name) {
 	/* This will always stay consistent, otherwise we'll lose the list in memory.*/
 	distributionListRoot = AllocateZeroPool(sizeof(BootableLinuxDistro));
 	if (!distributionListRoot) {
