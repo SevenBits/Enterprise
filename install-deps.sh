@@ -19,10 +19,10 @@
 set -e
 mkdir build-deps 2> /dev/null >> /dev/null
 cd build-deps
-wget -q http://downloads.sourceforge.net/project/gnu-efi/gnu-efi-3.0.2.tar.bz2
-tar -jxvf gnu-efi-3.0.2.tar.bz2 >> /dev/null
+wget -q http://downloads.sourceforge.net/project/gnu-efi/gnu-efi-3.0.3.tar.bz2
+tar -jxvf gnu-efi-3.0.3.tar.bz2 >> /dev/null
 
-cd gnu-efi-3.0.2
+cd gnu-efi-3.0.3
 make
 sudo make install
 
