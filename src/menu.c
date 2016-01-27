@@ -215,7 +215,7 @@ EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 
 	return err; // Shouldn't get here.
 }
 
-EFI_STATUS DisplayMenu(void) {
+EFI_STATUS DisplayMenu(VOID) {
 	EFI_STATUS err;
 	UINT64 key;
 	boot_options = AllocateZeroPool(sizeof(CHAR16) * 150);
