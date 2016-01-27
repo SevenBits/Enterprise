@@ -183,7 +183,7 @@ EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 
 	while (conductor != NULL) {
 		if (conductor->bootOption->name) {
 			Print(L"    %d) %a\n", ++iteratorIndex, conductor->bootOption->name);
-		}
+		} else ++iteratorIndex;
 		
 		conductor = conductor->next;
 	}
