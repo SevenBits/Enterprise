@@ -15,7 +15,7 @@
  # Copyright (C) 2013 SevenBits
  #
  #
-ARCH            = $(shell uname -m | sed s,i[3456789]86,ia32,)
+ARCH            ?= $(shell uname -m | sed s,i[3456789]86,ia32,)
 
 EFI-OBJS        = main.o menu.o utils.o distribution.o
 TARGET          = enterprise.efi
