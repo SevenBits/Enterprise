@@ -187,9 +187,7 @@ CHAR16* ASCIItoUTF16(CHAR8 *InString, UINTN InLength) {
 
 	str = AllocatePool((InLength + 1) * sizeof(CHAR16));
 	while (i < InLength) {
-		INTN utf8len;
-
-		utf8len = NarrowToLongCharConvert(InString + i, str + strlen);
+		INTN utf8len = NarrowToLongCharConvert(InString + i, str + strlen);
 		if (utf8len <= 0) {
 			i++;
 			continue;
