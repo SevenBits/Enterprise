@@ -2,7 +2,7 @@ Enterprise
 ==========
 [![Build Status](https://travis-ci.org/SevenBits/Enterprise.png)](https://travis-ci.org/SevenBits/Enterprise)
 
-This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
+This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://www.sevenbits.tk/), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
 
 Enterprise supports booting multiple distributions, so you can have more than one distribution per USB stick and multiple configurations for each distribution.
 
