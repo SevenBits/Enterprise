@@ -93,6 +93,13 @@ EFI_STATUS ReadStringFromKeyboard(OUT CHAR16 **outString) {
 	UINT32 charactersEntered = 0;
 	*outString = AllocateZeroPool(sizeof(CHAR16) * (maxInputLength + 1));
 	
+	// Check to make sure we have the memory.
+	if (!outString) {
+		DisplayErrorText(L"Error: can't allocate memory for keyboard input.\n");
+		return EFI_OUT_OF_RESOURCES;
+	}
+	
+	// Read (and echo back to) the keyboard
 	CHAR16 key = 0;
 	while (key != 13) {
 		EFI_INPUT_KEY inputKey;
