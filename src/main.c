@@ -295,7 +295,7 @@ static void ReadConfigurationFile(const CHAR16 * const name) {
 				conductor->bootOption->kernel_path = AllocatePool(kernelStringLength + 1); // +1 is for null terminator
 				if (!conductor->bootOption->kernel_path) {
 					DisplayErrorText(L"Unable to allocate memory.");
-					Print(L" %s %d", __FILE__, __LINE__);
+					Print(L" %s %d\n", __FILE__, __LINE__);
 				}
 
 				strncpya(conductor->bootOption->kernel_path, value, spaceCharPos);
