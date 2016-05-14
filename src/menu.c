@@ -348,7 +348,7 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 		// Allow the user to enter their own kernel parameter if they wish.
 		// We only modify options_array if they selected an actual option that can be
 		// toggled, and not if option 9 is selected. Option 9 should only be
-		// highlighted if the user selects something.
+		// highlighted if the user types something.
 		if (index == 9) {
 			uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, numberOfDisplayRows - 1);
 			uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, TRUE);
