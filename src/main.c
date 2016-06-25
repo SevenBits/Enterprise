@@ -130,6 +130,8 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 				return EFI_LOAD_ERROR;
 			}
 
+			Print(L"Autobooting %d.\n", autobootIndex);
+			uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
 			BootLinuxWithOptions(L"", autobootIndex);
 		}
 	} else {
@@ -274,8 +276,8 @@ static void ReadConfigurationFile(const CHAR16 * const name) {
 			// Check if they've given us a parameter; if they have, check if it's a valid
 			// integer and then parse it.
 			// The user can currently only autoboot the first ten entries.
-			if (strlena(value) == 2 && *value == ' ' && (*(value + 1) >= 48 && *(value + 1) <= 57)) {
-				autobootIndex = *(value + 1) - '0';
+			if (strlena(value) == 1 && (*value >= 48 && *value <= 57)) {
+				autobootIndex = *value - '0';
 			}
 		}
 		// The user has put a given a distribution entry.
