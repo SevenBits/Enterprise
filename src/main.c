@@ -130,13 +130,7 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 				return EFI_LOAD_ERROR;
 			}
 
-			// Load the selected Linux distribution automatically.
-			BootableLinuxDistro *conductor = distributionListRoot;
-			for (UINTN i = 0; i <= autobootIndex && conductor != NULL; i++, conductor = conductor->next);
-			LinuxBootOption *boot_params = conductor->bootOption;
-
-			CHAR16 *params = ASCIItoUTF16(boot_params->kernel_options, strlena(boot_params->kernel_options) + 1);
-			BootLinuxWithOptions(params, autobootIndex);
+			BootLinuxWithOptions(L"", autobootIndex);
 		}
 	} else {
 		DisplayErrorText(L"Cannot continue because core files are missing or damaged.\nRestarting...\n");
