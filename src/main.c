@@ -135,7 +135,7 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 			for (UINTN i = 0; i <= autobootIndex && conductor != NULL; i++, conductor = conductor->next);
 			LinuxBootOption *boot_params = conductor->bootOption;
 
-			CHAR16 *params = ASCIItoUTF16(boot_params->kernel_options, strlena(boot_params->kernel_options));
+			CHAR16 *params = ASCIItoUTF16(boot_params->kernel_options, strlena(boot_params->kernel_options) + 1);
 			BootLinuxWithOptions(params, autobootIndex);
 		}
 	} else {
@@ -190,13 +190,22 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 	CHAR8 *initrd_path = boot_params->initrd_path;
 	CHAR8 *boot_folder = boot_params->boot_folder;
 	CHAR8 *iso_path = boot_params->iso_path;
-	
+
+	// Convert the kernel options string from a UTF16 string into an ASCII C string.
+	// We need to do this because GNU-EFI uses Unicode internally but we can only pass ASCII
+	// C strings to GRUB.
+	//
+	// We also concatenate the kernel options given as part of the Enterprise configuration
+	// file with the user selected kernel options from the Advanced menu. The user selected
+	// options should override those given in the configuration file.
 	CHAR8 *sized_str = UTF16toASCII(params, StrLen(params) + 1);
 	CHAR8 *kernel_parameters = NULL;
 	kernel_parameters = AllocatePool(sizeof(CHAR8) * (strlena(sized_str) + strlena(boot_params->kernel_options)));
-	strcpya(kernel_parameters, sized_str);
 	if (boot_params->kernel_options && strlena(boot_params->kernel_options) > 0) {
-		strcata(kernel_parameters, boot_params->kernel_options);
+		strcpya(kernel_parameters, boot_params->kernel_options);
+		strcata(kernel_parameters, sized_str);
+	} else {
+		strcpya(kernel_parameters, boot_params->kernel_options);
 	}
 	
 	efi_set_variable(&grub_variable_guid, L"Enterprise_LinuxBootOptions", kernel_parameters,
