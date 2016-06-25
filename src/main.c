@@ -37,9 +37,12 @@ CHAR16 *banner = L"Welcome to Enterprise! - Version %d.%d.%d\n";
 
 EFI_LOADED_IMAGE *this_image = NULL;
 static EFI_FILE *root_dir;
+static BOOLEAN shouldAutoboot;
+static UINTN autobootIndex = 0;
 
 EFI_HANDLE global_image = NULL; // EFI_HANDLE is a typedef to a VOID pointer.
 BootableLinuxDistro *distributionListRoot;
+static INTN distroCount = -1; // start at -1 due to an error on my part.
 
 /* entry function for EFI */
 EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
@@ -117,7 +120,24 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	
 	// Display the menu where the user can select what they want to do.
 	if (can_continue) {
-		DisplayMenu();
+		if (!shouldAutoboot) {
+			DisplayMenu();
+		} else {
+			// Don't allow the user to overflow.
+			if (autobootIndex > (UINTN)distroCount) {
+				DisplayErrorText(L"Cannot continue because you have selected an invalid distribution.\nRestarting...\n");
+				uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
+				return EFI_LOAD_ERROR;
+			}
+
+			// Load the selected Linux distribution automatically.
+			BootableLinuxDistro *conductor = distributionListRoot;
+			for (UINTN i = 0; i <= autobootIndex && conductor != NULL; i++, conductor = conductor->next);
+			LinuxBootOption *boot_params = conductor->bootOption;
+
+			CHAR16 *params = ASCIItoUTF16(boot_params->kernel_options, strlena(boot_params->kernel_options));
+			BootLinuxWithOptions(params, autobootIndex);
+		}
 	} else {
 		DisplayErrorText(L"Cannot continue because core files are missing or damaged.\nRestarting...\n");
 		uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
@@ -244,8 +264,19 @@ static void ReadConfigurationFile(const CHAR16 * const name) {
 		 * We require the user to specify an entry, followed by the file name and
 		 * any information required to boot the Linux distribution.
 		 */
+		// The autoboot entry was enabled.
+		if (strcmpa((CHAR8 *)"autoboot", key) == 0) {
+			shouldAutoboot = TRUE;
+
+			// Check if they've given us a parameter; if they have, check if it's a valid
+			// integer and then parse it.
+			// The user can currently only autoboot the first ten entries.
+			if (strlena(value) == 2 && *value == ' ' && (*(value + 1) >= 48 && *(value + 1) <= 57)) {
+				autobootIndex = *(value + 1) - '0';
+			}
+		}
 		// The user has put a given a distribution entry.
-		if (strcmpa((CHAR8 *)"entry", key) == 0) {
+		else if (strcmpa((CHAR8 *)"entry", key) == 0) {
 			BootableLinuxDistro *new = AllocateZeroPool(sizeof(BootableLinuxDistro));
 			if (!new) {
 				DisplayErrorText(L"Failed to allocate memory for distribution entry.");
@@ -258,6 +289,7 @@ static void ReadConfigurationFile(const CHAR16 * const name) {
 			conductor->next = new;
 			new->next = NULL;
 			conductor = conductor->next; // subsequent operations affect the new link in the chain
+			distroCount++;
 		}
 		// The user has given us a distribution family.
 		else if (strcmpa((CHAR8 *)"family", key) == 0) {
