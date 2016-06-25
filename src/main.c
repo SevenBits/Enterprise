@@ -249,7 +249,7 @@ static void ReadConfigurationFile(const CHAR16 * const name) {
 	/* This will always stay consistent, otherwise we'll lose the list in memory.*/
 	distributionListRoot = AllocateZeroPool(sizeof(BootableLinuxDistro));
 	if (!distributionListRoot) {
-		DisplayErrorText(L"Unable to allocate memory for linked list.");	
+		DisplayErrorText(L"Unable to allocate memory for linked list.\n");
 	}
 
 	BootableLinuxDistro *conductor; // Will point to each node as we traverse the list.
