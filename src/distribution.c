@@ -28,6 +28,9 @@ CHAR8* KernelLocationForDistributionName(CHAR8 *name, OUT CHAR8 **boot_folder) {
 	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0) {
 		*boot_folder = (CHAR8 *)"casper";
 		return (CHAR8 *)"/casper/vmlinuz.efi";
+	} else if (strcmpa((CHAR8 *)"Pentoo", name) == 0) {
+		*boot_folder = (CHAR8 *)"isolinux";
+		return (CHAR8 *)"/isolinux/pentoo";
 	} else {
 		return (CHAR8 *)"";
 	}
@@ -38,6 +41,8 @@ CHAR8* InitRDLocationForDistributionName(CHAR8 *name) {
 		return (CHAR8 *)"/live/initrd.img";
 	} else if (strcmpa((CHAR8 *)"Ubuntu", name) == 0) {
 		return (CHAR8 *)"/casper/initrd.lz";
+	} else if (strcmpa((CHAR8 *)"Pentoo", name) == 0) {
+		return (CHAR8 *)"/isolinux/pentoo.igz";
 	} else {
 		return (CHAR8 *)"";
 	}
