@@ -236,11 +236,13 @@ EFI_STATUS DisplayMenu(VOID) {
 	Print(L"\n    Press any other key to reboot the system.\n");
 	
 	err = key_read(&key, TRUE);
+	//Print(L"%d", key);
+	//uefi_call_wrapper(BS->Stall, 1, 3 * 1000 * 1000);
 	if (key == '1') {
 		DisplayDistributionSelector(distributionListRoot, L"", FALSE);
 	} else if (key == '2') {
 		DisplayDistributionSelector(distributionListRoot, L"", TRUE);
-	} else if (key == 1507328) { // Escape key
+	} else if (key == 27 || key == 1507328) { // Escape key
 		ShowAboutPage();
 		uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
 		Print(banner, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
@@ -268,7 +270,6 @@ EFI_STATUS DisplayMenu(VOID) {
 static void ShowAboutPage(VOID) {
 	UINT64 sig = ST->Hdr.Signature;
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut); // Clear the screen.
-	uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, 0);
 	
 	// Print the Enterprise info and the system firmware version.
 	DisplayColoredText(L"\n\n    Enterprise ");
