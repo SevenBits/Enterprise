@@ -130,8 +130,6 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 				return EFI_LOAD_ERROR;
 			}
 
-			Print(L"Autobooting %d.\n", autobootIndex);
-			uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
 			BootLinuxWithOptions(L"", autobootIndex);
 		}
 	} else {
