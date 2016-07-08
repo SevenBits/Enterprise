@@ -351,7 +351,6 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 		// toggled, and not if option 9 is selected. Option 9 should only be
 		// highlighted if the user types something.
 		if (index == 9) {
-			uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, numberOfDisplayRows - 1);
 			uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, TRUE);
 			Print(L"> ");
 
@@ -360,7 +359,6 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 			if (!EFI_ERROR(err)) StrCat(options, input);
 			FreePool(input);
 
-			uefi_call_wrapper(ST->ConOut->SetCursorPosition, 3, ST->ConOut, 0, 0);
 			uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, FALSE);
 
 			// Highlight the ninth option if the user has entered an option.
