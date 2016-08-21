@@ -373,35 +373,35 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 	// Now concatenate the individual options onto the option line.
 	// I'm investigating a better way to do this.
 	if (options_array[0]) {
-		StrCat(options, L"nomodeset ");
+		StrCat(options, L" nomodeset ");
 	}
 	
 	if (options_array[1]) {
-		StrCat(options, L"acpi=off ");
+		StrCat(options, L" acpi=off ");
 	}
 	
 	if (options_array[2]) {
-		StrCat(options, L"noefi ");
+		StrCat(options, L" noefi ");
 	}
 	
 	if (options_array[3]) {
-		StrCat(options, L"vga=ask ");
+		StrCat(options, L" vga=ask ");
 	}
 	
 	if (options_array[4]) {
-		StrCat(options, L"persistent ");
+		StrCat(options, L" persistent ");
 	}
 	
 	if (options_array[5]) {
-		StrCat(options, L"toram ");
+		StrCat(options, L" toram ");
 	}
 	
 	if (options_array[6]) {
-		StrCat(options, L"debug ");
+		StrCat(options, L" debug ");
 	}
 	
 	if (options_array[7]) {
-		StrCat(options, L"gpt ");
+		StrCat(options, L" gpt ");
 	}
 	
 	BootLinuxWithOptions(options, distribution_id);
