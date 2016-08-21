@@ -42,7 +42,7 @@ Secondly, all source code files must use *tabs* - not spaces, and I expect a tab
 I will accept pull requests on two conditions:
 
 1. Your code follows my coding styles (mentioned above) and
-2. Your code is licensed under an LGPL-compatible license and is readable and decently commented.
+2. Your code is licensed under the LGPL and is readable and decently commented.
 
 Assuming that your code is in compliance with these rules, I usually will accept pull requests that either: add a feature/fix a bug that is listed above or fix an issue filed through GitHub.
 
