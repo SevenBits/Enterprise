@@ -199,7 +199,7 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 		strcpya(kernel_parameters, boot_params->kernel_options);
 		strcata(kernel_parameters, sized_str);
 	} else {
-		strcpya(kernel_parameters, boot_params->kernel_options);
+		strcpya(kernel_parameters, sized_str);
 	}
 	
 	efi_set_variable(&grub_variable_guid, L"Enterprise_LinuxBootOptions", kernel_parameters,
