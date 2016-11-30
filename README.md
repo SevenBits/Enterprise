@@ -12,7 +12,7 @@ Now, with that out the way (phew!), let's get to the interesting stuff, shall we
 
 ### LICENSE ###
 
-Enterprise is under the LGPL. Enterprise is not *only* my program; it pulls in code from other software projects (namely, gummiboot), and I want to make sure that not only they get credit from their work, but that others can benefit from what I've done as well. Releasing Enterprise under the LGPL allows me to most easily do this.
+Enterprise is under the GNU GPL v3. Enterprise is not *only* my program; it pulls in code from other software projects (namely, gummiboot), and I want to make sure that not only they get credit from their work, but that others can benefit from what I've done as well. Releasing Enterprise under the GPL allows me to most easily do this.
 
 ### CODING STYLE ###
 
