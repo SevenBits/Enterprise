@@ -2,11 +2,11 @@ Enterprise
 ==========
 [![Build Status](https://travis-ci.org/SevenBits/Enterprise.png)](https://travis-ci.org/SevenBits/Enterprise)
 
-This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://www.sevenbits.tk/mlul/), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
+This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://www.sevenbits.io/mlul/), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
 
 Enterprise supports booting multiple distributions, so you can have more than one distribution per USB stick and multiple configurations for each distribution.
 
-Enterprise requires a configuration file telling it about which distributions it should load. This configuration file is created automatically when you use tools like [Mac Linux USB Loader](https://www.sevenbits.tk/mlul/), though it is possible to write your own file and configure Enterprise as one would configure other boot managers such as GRUB, gummiboot, and syslinux, albeit much more simply.
+Enterprise requires a configuration file telling it about which distributions it should load. This configuration file is created automatically when you use tools like [Mac Linux USB Loader](https://www.sevenbits.io/mlul/), though it is possible to write your own file and configure Enterprise as one would configure other boot managers such as GRUB, gummiboot, and syslinux, albeit much more simply.
 
 Now, with that out the way (phew!), let's get to the interesting stuff, shall we?
 
@@ -42,7 +42,7 @@ Secondly, all source code files must use *tabs* - not spaces, and I expect a tab
 I will accept pull requests on two conditions:
 
 1. Your code follows my coding styles (mentioned above) and
-2. Your code is licensed under the LGPL and is readable and decently commented.
+2. Your code is licensed under the GPL and is readable and decently commented.
 
 Assuming that your code is in compliance with these rules, I usually will accept pull requests that either: add a feature/fix a bug that is listed above or fix an issue filed through GitHub.
 
