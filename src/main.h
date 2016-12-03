@@ -2,10 +2,9 @@
  * Tool intended to help facilitate the process of booting Linux on Intel
  * Macintosh computers made by Apple from a USB stick or similar.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of version 3 of the GNU General Public License as
+ * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,12 +29,17 @@
 
 extern CHAR16 *banner;
 #define VERSION_MAJOR 0
-#define VERSION_MINOR 3
-#define VERSION_PATCH 1
+#define VERSION_MINOR 4
+#define VERSION_PATCH 0
 
 #define AllocateMemoryAndCopyChar8String(dest, src) \
 	if (dest) FreePool(dest); dest = NULL; \
 	dest = AllocatePool(sizeof(CHAR8) * (strlena(src) + 1)); \
+	if (!dest) {\
+		DisplayErrorText(L"Unable to allocate memory."); \
+		Print(L" %s %d", __FILE__, __LINE__); \
+		return; \
+	} \
 	strcpya(dest, src); \
 
 typedef struct LinuxBootOption {

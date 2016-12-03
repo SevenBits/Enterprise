@@ -2,10 +2,9 @@
  * Tool intended to help facilitate the process of booting Linux on Intel
  * Macintosh computers made by Apple from a USB stick or similar.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of version 3 of the GNU General Public License as
+ * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -70,8 +69,8 @@ EFI_STATUS key_read(UINT64 *key, BOOLEAN wait) {
 	);
 
 	typedef EFI_STATUS (EFIAPI *EFI_SET_STATE)(
-				struct _EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This;
-				EFI_KEY_TOGGLE_STATE *KeyToggleState;
+		struct _EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This;
+		EFI_KEY_TOGGLE_STATE *KeyToggleState;
 	);
 
 	typedef EFI_STATUS (EFIAPI *EFI_KEY_NOTIFY_FUNCTION)(
@@ -182,11 +181,10 @@ EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 
 	INTN iteratorIndex = 0;
 	while (conductor != NULL) {
 		if (conductor->bootOption->name) {
-			Print(L"    %d) %a\n", (iteratorIndex + 1), conductor->bootOption->name);
-		}
+			Print(L"    %d) %a\n", ++iteratorIndex, conductor->bootOption->name);
+		} else ++iteratorIndex;
 		
 		conductor = conductor->next;
-		iteratorIndex++;
 	}
 	Print(L"\n    Press any other key to reboot the system.\n");
 	
@@ -216,10 +214,14 @@ EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 
 	return err; // Shouldn't get here.
 }
 
-EFI_STATUS DisplayMenu(void) {
+EFI_STATUS DisplayMenu(VOID) {
 	EFI_STATUS err;
 	UINT64 key;
 	boot_options = AllocateZeroPool(sizeof(CHAR16) * 150);
+	if (!boot_options) {
+		DisplayErrorText(L"Failed to allocate memory for boot options string.");
+		return EFI_OUT_OF_RESOURCES;
+	}
 	
 	start:
 	
@@ -233,11 +235,13 @@ EFI_STATUS DisplayMenu(void) {
 	Print(L"\n    Press any other key to reboot the system.\n");
 	
 	err = key_read(&key, TRUE);
+	//Print(L"%d", key);
+	//uefi_call_wrapper(BS->Stall, 1, 3 * 1000 * 1000);
 	if (key == '1') {
 		DisplayDistributionSelector(distributionListRoot, L"", FALSE);
 	} else if (key == '2') {
 		DisplayDistributionSelector(distributionListRoot, L"", TRUE);
-	} else if (key == 1507328) { // Escape key
+	} else if (key == 27 || key == 1507328) { // Escape key
 		ShowAboutPage();
 		uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
 		Print(banner, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
@@ -265,7 +269,6 @@ EFI_STATUS DisplayMenu(void) {
 static void ShowAboutPage(VOID) {
 	UINT64 sig = ST->Hdr.Signature;
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut); // Clear the screen.
-	uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, 0);
 	
 	// Print the Enterprise info and the system firmware version.
 	DisplayColoredText(L"\n\n    Enterprise ");
@@ -329,7 +332,7 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 		OPTION(L"\n    7) debug - Enable kernel debugging.", 6);
 		OPTION(L"\n    8) gpt - Forces disk with valid GPT signature but invalid Protective MBR" \
 				" to be treated as GPT (useful for installing Linux on a Mac drive).", 7);
-		Print(L"\n    9) Custom...");
+		OPTION(L"\n    9) Custom...", 8);
 		if (StrLen(options) > 0) Print(L" %s", options);
 
 		Print(L"\n\n    0) Boot with selected options.\n");
@@ -341,56 +344,63 @@ EFI_STATUS ConfigureKernel(CHAR16 *options, BOOLEAN preset_options[], int preset
 		}
 		
 		UINT64 index = key - '0';
-		options_array[index - 1] = !options_array[index - 1];
 		
 		// Allow the user to enter their own kernel parameter if they wish.
+		// We only modify options_array if they selected an actual option that can be
+		// toggled, and not if option 9 is selected. Option 9 should only be
+		// highlighted if the user types something.
 		if (index == 9) {
-			uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, numberOfDisplayRows - 1);
 			uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, TRUE);
 			Print(L"> ");
-			
+
 			CHAR16 *input = NULL;
 			EFI_STATUS err = ReadStringFromKeyboard(&input);
 			if (!EFI_ERROR(err)) StrCat(options, input);
 			FreePool(input);
-			
-			uefi_call_wrapper(ST->ConOut->SetCursorPosition, 2, 0, 0);
+
 			uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, FALSE);
+
+			// Highlight the ninth option if the user has entered an option.
+			if (StrLen(input) > 0) {
+				options_array[8] = TRUE;
+			}
+		} else {
+			options_array[index - 1] = !options_array[index - 1];
 		}
 	} while(key != '0');
 	
 	// Now concatenate the individual options onto the option line.
 	// I'm investigating a better way to do this.
 	if (options_array[0]) {
-		StrCat(options, L"nomodeset ");
+		StrCat(options, L" nomodeset ");
 	}
 	
 	if (options_array[1]) {
-		StrCat(options, L"acpi=off ");
+		StrCat(options, L" acpi=off ");
 	}
 	
 	if (options_array[2]) {
-		StrCat(options, L"noefi ");
+		StrCat(options, L" noefi ");
 	}
 	
 	if (options_array[3]) {
-		StrCat(options, L"vga=ask ");
+		StrCat(options, L" vga=ask ");
 	}
 	
 	if (options_array[4]) {
-		StrCat(options, L"persistent ");
+		StrCat(options, L" persistent ");
 	}
 	
 	if (options_array[5]) {
-		StrCat(options, L"toram ");
+		StrCat(options, L" toram ");
 	}
 	
 	if (options_array[6]) {
-		StrCat(options, L"debug ");
+		StrCat(options, L" debug ");
 	}
 	
 	if (options_array[7]) {
-		StrCat(options, L"gpt ");
+		StrCat(options, L" gpt ");
 	}
 	
 	BootLinuxWithOptions(options, distribution_id);

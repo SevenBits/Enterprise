@@ -1,19 +1,18 @@
 Enterprise
 ==========
 [![Build Status](https://travis-ci.org/SevenBits/Enterprise.png)](https://travis-ci.org/SevenBits/Enterprise)
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/SevenBits/enterprise/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
-This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
+This source code archive contains code for Enterprise, a custom UEFI boot manager designed to load Linux distributions, even those without UEFI booting support, directly from ISO files on UEFI-based computers. Enterprise was originally designed to compliment [Mac Linux USB Loader](https://www.sevenbits.io/mlul/), but it can also be used on its own to boot Linux on a variety of UEFI-based PCs and Macs. Enterprise provides an easy-to-use and simplistic interface to GRUB, automating many of the tasks necessary to boot distributions of Linux from an ISO file.
 
 Enterprise supports booting multiple distributions, so you can have more than one distribution per USB stick and multiple configurations for each distribution.
 
-Enterprise requires a configuration file telling it about which distributions it should load. This configuration file is created automatically when you use tools like [Mac Linux USB Loader](https://github.com/SevenBits/Mac-Linux-USB-Loader), though it is possible to write your own file and configure Enterprise as one would configure other boot managers such as GRUB, gummiboot, and syslinux, albeit much more simply.
+Enterprise requires a configuration file telling it about which distributions it should load. This configuration file is created automatically when you use tools like [Mac Linux USB Loader](https://www.sevenbits.io/mlul/), though it is possible to write your own file and configure Enterprise as one would configure other boot managers such as GRUB, gummiboot, and syslinux, albeit much more simply.
 
 Now, with that out the way (phew!), let's get to the interesting stuff, shall we?
 
 ### LICENSE ###
 
-Enterprise is under the LGPL. Enterprise is not *only* my program; it pulls in code from other software projects (namely, gummiboot), and I want to make sure that not only they get credit from their work, but that others can benefit from what I've done as well. Releasing Enterprise under the LGPL allows me to most easily do this.
+Enterprise is under the GNU GPL v3. Enterprise is not *only* my program; it pulls in code from other software projects (namely, gummiboot), and I want to make sure that not only they get credit from their work, but that others can benefit from what I've done as well. Releasing Enterprise under the GPL allows me to most easily do this.
 
 ### CODING STYLE ###
 
@@ -43,7 +42,7 @@ Secondly, all source code files must use *tabs* - not spaces, and I expect a tab
 I will accept pull requests on two conditions:
 
 1. Your code follows my coding styles (mentioned above) and
-2. Your code is licensed under an LGPL-compatible license and is readable and decently commented.
+2. Your code is licensed under the GPL and is readable and decently commented.
 
 Assuming that your code is in compliance with these rules, I usually will accept pull requests that either: add a feature/fix a bug that is listed above or fix an issue filed through GitHub.
 

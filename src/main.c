@@ -2,10 +2,9 @@
  * Tool intended to help facilitate the process of booting Linux on Intel
  * Macintosh computers made by Apple from a USB stick or similar.
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of version 3 of the GNU General Public License as
+ * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +27,7 @@
 const EFI_GUID enterprise_variable_guid = {0xd92996a6, 0x9f56, 0x48fc, {0xc4, 0x45, 0xb9, 0x0f, 0x23, 0x98, 0x6d, 0x4a}};
 const EFI_GUID grub_variable_guid = {0x8BE4DF61, 0x93CA, 0x11d2, {0xAA, 0x0D, 0x00, 0xE0, 0x98, 0x03, 0x2B,0x8C}};
 
-static void ReadConfigurationFile(const CHAR16 *);
+static void ReadConfigurationFile(const CHAR16 const *);
 
 static EFI_STATUS console_text_mode(VOID);
 static EFI_STATUS SetupDisplay(VOID);
@@ -37,9 +36,12 @@ CHAR16 *banner = L"Welcome to Enterprise! - Version %d.%d.%d\n";
 
 EFI_LOADED_IMAGE *this_image = NULL;
 static EFI_FILE *root_dir;
+static BOOLEAN shouldAutoboot;
+static UINTN autobootIndex = 0;
 
 EFI_HANDLE global_image = NULL; // EFI_HANDLE is a typedef to a VOID pointer.
 BootableLinuxDistro *distributionListRoot;
+static INTN distroCount = -1; // start at -1 due to an error on my part.
 
 /* entry function for EFI */
 EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
@@ -83,7 +85,6 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	/* Check to make sure that we have our configuration file and GRUB bootloader. */
 	if (!FileExists(root_dir, L"\\efi\\boot\\enterprise.cfg")) {
 		// Check if we have an old-style configuration file instead.
-		
 		if (!FileExists(root_dir, L"\\efi\\boot\\.MLUL-Live-USB")) {
 			DisplayErrorText(L"Error: can't find configuration file.\n");
 			can_continue = FALSE;
@@ -118,7 +119,18 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	
 	// Display the menu where the user can select what they want to do.
 	if (can_continue) {
-		DisplayMenu();
+		if (!shouldAutoboot) {
+			DisplayMenu();
+		} else {
+			// Don't allow the user to overflow.
+			if (autobootIndex > (UINTN)distroCount) {
+				DisplayErrorText(L"Cannot continue because you have selected an invalid distribution.\nRestarting...\n");
+				uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
+				return EFI_LOAD_ERROR;
+			}
+
+			BootLinuxWithOptions(L"", autobootIndex);
+		}
 	} else {
 		DisplayErrorText(L"Cannot continue because core files are missing or damaged.\nRestarting...\n");
 		uefi_call_wrapper(BS->Stall, 1, 1000 * 1000);
@@ -171,25 +183,34 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 	CHAR8 *initrd_path = boot_params->initrd_path;
 	CHAR8 *boot_folder = boot_params->boot_folder;
 	CHAR8 *iso_path = boot_params->iso_path;
-	
+
+	// Convert the kernel options string from a UTF16 string into an ASCII C string.
+	// We need to do this because GNU-EFI uses Unicode internally but we can only pass ASCII
+	// C strings to GRUB.
+	//
+	// We also concatenate the kernel options given as part of the Enterprise configuration
+	// file with the user selected kernel options from the Advanced menu. The user selected
+	// options should override those given in the configuration file.
 	CHAR8 *sized_str = UTF16toASCII(params, StrLen(params) + 1);
 	CHAR8 *kernel_parameters = NULL;
 	kernel_parameters = AllocatePool(sizeof(CHAR8) * (strlena(sized_str) + strlena(boot_params->kernel_options)));
-	strcpya(kernel_parameters, sized_str);
 	if (boot_params->kernel_options && strlena(boot_params->kernel_options) > 0) {
-		strcata(kernel_parameters, boot_params->kernel_options);
+		strcpya(kernel_parameters, boot_params->kernel_options);
+		strcata(kernel_parameters, sized_str);
+	} else {
+		strcpya(kernel_parameters, sized_str);
 	}
 	
 	efi_set_variable(&grub_variable_guid, L"Enterprise_LinuxBootOptions", kernel_parameters,
-		sizeof(kernel_parameters[0]) * strlena(kernel_parameters) + 1, FALSE);
+		sizeof(kernel_parameters[0]) * (strlena(kernel_parameters) + 1), FALSE);
 	efi_set_variable(&grub_variable_guid, L"Enterprise_LinuxKernelPath", kernel_path,
-		sizeof(kernel_path[0]) * strlena(kernel_path) + 1, FALSE);
+		sizeof(kernel_path[0]) * (strlena(kernel_path) + 1), FALSE);
 	efi_set_variable(&grub_variable_guid, L"Enterprise_InitRDPath", initrd_path,
-		sizeof(initrd_path[0]) * strlena(initrd_path) + 1, FALSE);
+		sizeof(initrd_path[0]) * (strlena(initrd_path) + 1), FALSE);
 	efi_set_variable(&grub_variable_guid, L"Enterprise_ISOPath", iso_path,
-		sizeof(iso_path[0]) * strlena(iso_path) + 1, FALSE);
+		sizeof(iso_path[0]) * (strlena(iso_path) + 1), FALSE);
 	efi_set_variable(&grub_variable_guid, L"Enterprise_BootFolder", boot_folder,
-		sizeof(boot_folder[0]) * strlena(boot_folder) + 1, FALSE);
+		sizeof(boot_folder[0]) * (strlena(boot_folder) + 1), FALSE);
 	
 	// Load the EFI boot loader image into memory.
 	path = FileDevicePath(this_image->DeviceHandle, L"\\efi\\boot\\boot.efi");
@@ -221,11 +242,14 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 	return EFI_SUCCESS;
 }
 
-static void ReadConfigurationFile(const CHAR16 *name) {
+static void ReadConfigurationFile(const CHAR16 * const name) {
 	/* This will always stay consistent, otherwise we'll lose the list in memory.*/
 	distributionListRoot = AllocateZeroPool(sizeof(BootableLinuxDistro));
+	if (!distributionListRoot) {
+		DisplayErrorText(L"Unable to allocate memory for linked list.\n");
+	}
+
 	BootableLinuxDistro *conductor; // Will point to each node as we traverse the list.
-	
 	conductor = distributionListRoot; // Start by pointing at the first element.
 	
 	CHAR8 *contents;
@@ -242,9 +266,24 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 		 * We require the user to specify an entry, followed by the file name and
 		 * any information required to boot the Linux distribution.
 		 */
+		// The autoboot entry was enabled.
+		if (strcmpa((CHAR8 *)"autoboot", key) == 0) {
+			shouldAutoboot = TRUE;
+
+			// Check if they've given us a parameter; if they have, check if it's a valid
+			// integer and then parse it.
+			// The user can currently only autoboot the first ten entries.
+			if (strlena(value) == 1 && (*value >= 48 && *value <= 57)) {
+				autobootIndex = *value - '0';
+			}
+		}
 		// The user has put a given a distribution entry.
-		if (strcmpa((CHAR8 *)"entry", key) == 0) {
+		else if (strcmpa((CHAR8 *)"entry", key) == 0) {
 			BootableLinuxDistro *new = AllocateZeroPool(sizeof(BootableLinuxDistro));
+			if (!new) {
+				DisplayErrorText(L"Failed to allocate memory for distribution entry.");
+			}
+
 			new->bootOption = AllocateZeroPool(sizeof(LinuxBootOption));
 			AllocateMemoryAndCopyChar8String(new->bootOption->name, value);
 			AllocateMemoryAndCopyChar8String(new->bootOption->iso_path, (CHAR8 *)"boot.iso"); // Set a default value.
@@ -252,6 +291,7 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 			conductor->next = new;
 			new->next = NULL;
 			conductor = conductor->next; // subsequent operations affect the new link in the chain
+			distroCount++;
 		}
 		// The user has given us a distribution family.
 		else if (strcmpa((CHAR8 *)"family", key) == 0) {
@@ -287,6 +327,11 @@ static void ReadConfigurationFile(const CHAR16 *name) {
 
 				// Allocate memory and begin the copy.
 				conductor->bootOption->kernel_path = AllocatePool(kernelStringLength + 1); // +1 is for null terminator
+				if (!conductor->bootOption->kernel_path) {
+					DisplayErrorText(L"Unable to allocate memory.");
+					Print(L" %s %d\n", __FILE__, __LINE__);
+				}
+
 				strncpya(conductor->bootOption->kernel_path, value, spaceCharPos);
 				*(conductor->bootOption->kernel_path + kernelStringLength) = '\0';
 				//Print(L"conductor->bootOption->kernel_path = %a\n", conductor->bootOption->kernel_path);
