@@ -173,7 +173,7 @@ static bool copy_file(const char * const source, const char * const destination)
 
 	if (!inFilePointer) goto write_failed;
 	if (!outFilePointer) {
-		fprintf(stderr, "Error: failed to open %s for writing; do we need to be root?", destination);
+		fprintf(stderr, "Error: failed to open %s for writing; do we need to be root?\n", destination);
 		goto write_failed;
 	}
 	
@@ -233,6 +233,7 @@ static bool perform_setup(void) {
 			if (temp) {
 				install_path = temp;
 				*(install_path + len) = '/';
+				*(install_path + len + 1) = '\0';
 			} else goto no_memory;
 		}
 	}
@@ -261,7 +262,7 @@ static bool perform_setup(void) {
 	}
 
 	return true;
-	
+
 no_memory:
 	fprintf(stderr, "Error: failed to allocate memory. Aborting.\n");
 	return false;
