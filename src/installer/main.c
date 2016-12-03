@@ -35,6 +35,7 @@ static const char *search_paths[6] = {"/etc/enterprise-efi/resources/", "/etc/op
 static bool should_verify;
 static bool should_configure = true; // Whether or not to write data to the config file
 
+<<<<<<< Updated upstream
 static void usage(char *prog_name) {
 	printf("usage: %s [--verify] [--help] [--blank | --config file] path\n", prog_name);
 	printf("\t--verify\tVerify that the installation is configured properly after setup\n");
@@ -43,6 +44,15 @@ static void usage(char *prog_name) {
 	printf("\t--help\t\tShows this help message\n");
 	printf("\tpath\t\tThe path to the mount point of the volume on which to install Enterprise\n");
 	printf("NOTE: you must specify either --blank or --config.\n");
+=======
+void usage(char *prog_name) {
+	printf("usage: %s [--blank] [--verify] [--config file] path\n", prog_name);
+	printf("\t--verify\t\tVerify that the installation is configured properly after setup\n");
+	printf("\t--blank\t\t\tWrite an empty file\n");
+	printf("\t--config file\t\tUse the specified file instead of creating a new one\n");
+	printf("\n");
+	printf("Note: --blank has no effect if --config is specified.\n");
+>>>>>>> Stashed changes
 }
 
 static bool handle_option(char *option, char **arg_ptr) {
@@ -140,6 +150,7 @@ static bool is_directory(const char *path) {
 	return false;
 }
 
+<<<<<<< Updated upstream
 static const char* check_search_path(void) {
 	// Try each listing in the list of potential Enterprises sources
 	// to find one with the valid files.
@@ -202,6 +213,15 @@ write_failed:
 }
 
 static bool perform_setup(void) {
+=======
+bool perform_setup() {
+	// Print an error if we're missing required information.
+	if (!install_path) {
+		usage("install-enterprise");
+		exit(1);
+	}
+
+>>>>>>> Stashed changes
 	// Get ready to copy the necessary files to the chosen path.
 	if (!install_path) {
 		usage(program_name);
@@ -247,6 +267,35 @@ static bool perform_setup(void) {
 		else goto no_config_written;
 	} else {
 		if (!copy_file(config_path, full_config_path)) return false;
+	}
+
+	FILE *fPointer;
+	// Copy the configuration file.
+	if (config_path) {
+		fPointer = fopen(config_path, "w");
+		char c;
+		fclose(fPointer);
+	}
+	// Create a new configuration file
+	else {
+		const char *constant_path = "/eft/boot/.MLUL-Live-USB";
+		char *complete_path = malloc(strlen(install_path) + strlen(constant_path) + 1);
+		if (!complete_path) {
+			fprintf(stderr, "Error: failed to allocate memory\n");
+			exit(1);
+		}
+
+		strcpy(complete_path, install_path);
+		strcat(complete_path, constant_path);
+
+		fPointer = fopen(complete_path, "w");
+		if (!should_configure) {
+			fputs("", fPointer);
+			fclose(fPointer);
+			return true;
+		}
+
+		fclose(fPointer);
 	}
 
 	return true;
