@@ -145,7 +145,7 @@ static const char* check_search_path(void) {
 	const char **needle = search_paths;
 	while (*needle) {
 		bool found = false;
-		char *desired_file_name = "bootX64.efi";
+		const char * const desired_file_name = "bootX64.efi";
 
 		char *tmp = malloc(strlen(*needle) + strlen(desired_file_name) + 1);
 		strcpy(tmp, *needle);
@@ -170,6 +170,12 @@ static bool copy_file(const char * const source, const char * const destination)
 	char *buffer;
 	FILE *inFilePointer = fopen(source, "rb");
 	FILE *outFilePointer = fopen(destination, "wb");
+
+	if (!inFilePointer) goto write_failed;
+	if (!outFilePointer) {
+		fprintf(stderr, "Error: failed to open %s for writing; do we need to be root?", destination);
+		goto write_failed;
+	}
 	
 	fseek(inFilePointer, 0, SEEK_END);
 	long fsize = ftell(inFilePointer);
@@ -245,36 +251,13 @@ static bool perform_setup(void) {
 		if (fp) fclose(fp);
 		else goto no_config_written;
 	} else {
+		if (!config_path) {
+			fprintf(stderr, "Error: you must specify a configuration file to copy ");
+			fprintf(stderr, "(or use --blank)\n");
+			goto no_config_written;
+		}
+
 		if (!copy_file(config_path, full_config_path)) return false;
-	}
-
-	FILE *fPointer;
-	// Copy the configuration file.
-	if (config_path) {
-		fPointer = fopen(config_path, "w");
-		char c;
-		fclose(fPointer);
-	}
-	// Create a new configuration file
-	else {
-		const char *constant_path = "/eft/boot/.MLUL-Live-USB";
-		char *complete_path = malloc(strlen(install_path) + strlen(constant_path) + 1);
-		if (!complete_path) {
-			fprintf(stderr, "Error: failed to allocate memory\n");
-			exit(1);
-		}
-
-		strcpy(complete_path, install_path);
-		strcat(complete_path, constant_path);
-
-		fPointer = fopen(complete_path, "w");
-		if (!should_configure) {
-			fputs("", fPointer);
-			fclose(fPointer);
-			return true;
-		}
-
-		fclose(fPointer);
 	}
 
 	return true;
