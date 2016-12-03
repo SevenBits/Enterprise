@@ -251,7 +251,7 @@ EFI_STATUS DisplayMenu(VOID) {
 		// counter-annoyance measure for screens which are incredibly large.
 		uefi_call_wrapper(ST->ConOut->SetMode, 2, ST->ConOut, 0);
 		numberOfDisplayRows = 80;
-		numberOfDisplayColoumns = 25;
+		numberOfDisplayColumns = 25;
 		uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, FALSE);
 		goto start;
 	} else {
@@ -281,7 +281,7 @@ static void ShowAboutPage(VOID) {
 	}
 	
 	Print(L"    Using a screen resolution of %d x %d, mode %d.\n",
-		numberOfDisplayRows, numberOfDisplayColoumns, highestModeNumberAvailable);
+		numberOfDisplayRows, numberOfDisplayColumns, highestModeNumberAvailable);
 	Print(L"    Press any key to go back.");
 	UINT64 key;
 	key_read(&key, TRUE);

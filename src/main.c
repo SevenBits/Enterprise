@@ -31,7 +31,7 @@ static void ReadConfigurationFile(const CHAR16 const *);
 
 static EFI_STATUS console_text_mode(VOID);
 static EFI_STATUS SetupDisplay(VOID);
-UINTN numberOfDisplayRows, numberOfDisplayColoumns, highestModeNumberAvailable = 0;
+UINTN numberOfDisplayRows, numberOfDisplayColumns, highestModeNumberAvailable = 0;
 CHAR16 *banner = L"Welcome to Enterprise! - Version %d.%d.%d\n";
 
 EFI_LOADED_IMAGE *this_image = NULL;
@@ -145,8 +145,8 @@ static EFI_STATUS SetupDisplay(VOID) {
 	EFI_STATUS err = EFI_SUCCESS;
 	
 	while (!EFI_ERROR(err)) {
-		err = uefi_call_wrapper(ST->ConOut->QueryMode, 4, ST->ConOut, highestModeNumberAvailable, &numberOfDisplayRows, &numberOfDisplayColoumns);
-		Print(L"Detected mode %d: %d x %d.\n", highestModeNumberAvailable, numberOfDisplayRows, numberOfDisplayColoumns);
+		err = uefi_call_wrapper(ST->ConOut->QueryMode, 4, ST->ConOut, highestModeNumberAvailable, &numberOfDisplayRows, &numberOfDisplayColumns);
+		Print(L"Detected mode %d: %d x %d.\n", highestModeNumberAvailable, numberOfDisplayRows, numberOfDisplayColumns);
 		
 		if (!EFI_ERROR(err)) highestModeNumberAvailable++;
 	}

@@ -63,7 +63,7 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *, UINT16);
 extern const EFI_GUID enterprise_variable_guid;
 extern const EFI_GUID grub_variable_guid;
 
-extern UINTN numberOfDisplayRows, numberOfDisplayColoumns, highestModeNumberAvailable;
+extern UINTN numberOfDisplayRows, numberOfDisplayColumns, highestModeNumberAvailable;
 extern BOOLEAN preset_options_array[PRESET_OPTIONS_SIZE];
 
 extern BootableLinuxDistro *distributionListRoot;
