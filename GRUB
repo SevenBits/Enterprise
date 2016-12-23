@@ -2,5 +2,10 @@ Build and compile Enterprise's modified version of GRUB using the commands here.
 to adjust the paths for your system:
 
 ./configure --with-platform=efi --enable-grub-fstest=no --enable-grub-mkfont=no --disable-nls --enable-efiemu=no
+make
+
+The command below must be performed from within the grub-core subdirectory after booting.
+Absolute paths are required for the graft point syntax. You cannot use relative paths or it
+will not work.
 
 ../grub-mkstandalone -d . -o ~/Desktop/boot.efi --format=x86_64-efi --grub-mkimage=../grub-mkimage --install-modules="boot linux ext2 normal configfile lspci ls help echo fat exfat hfs hfsplus efi_gop efi_uga gfxterm part_msdos part_gpt part_apple terminal sleep loopback normal fixvideo iso9660 loadbios setvariable applesetos" --modules="part_gpt part_msdos" /boot/grub/fonts/myfont.pf2='/boot/grub/fonts/unicode.pf2' /boot/grub/grub.cfg='/home/user/Code/Enterprise/grub.cfg'
