@@ -15,6 +15,7 @@
  *
  */
 
+#define _XOPEN_SOURCE 700
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -131,7 +132,7 @@ static void parse_args(int argc, char **argv) {
 static bool is_directory(const char *path) {
 	struct stat s;
 	if (stat(path, &s) == 0) {
-		if (s.st_mode & S_IFDIR) {
+		if (S_ISDIR(s.st_mode)) {
 			return true;
 		}
 	}
