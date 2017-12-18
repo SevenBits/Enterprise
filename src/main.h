@@ -30,7 +30,7 @@
 extern CHAR16 *banner;
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 4
-#define VERSION_PATCH 0
+#define VERSION_PATCH 1
 
 #define AllocateMemoryAndCopyChar8String(dest, src) \
 	if (dest) FreePool(dest); dest = NULL; \

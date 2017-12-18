@@ -9,19 +9,21 @@
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * General Public License for more details.
  *
- * Copyright (C) 2013 SevenBits
+ * Copyright (C) 2017 SevenBits
  *
  */
 
 #pragma once
-#ifndef _menu_h
-#define _menu_h
-#include "main.h"
+#ifndef _config_h
+#define _config_h
 
-EFI_STATUS DisplayMenu(void);
-EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *, CHAR16 *, BOOLEAN);
-EFI_STATUS ConfigureKernel(CHAR16 *, BOOLEAN[], int);
+extern EFI_FILE *root_dir;
+extern BOOLEAN shouldAutoboot;
+extern UINTN autobootIndex;
+extern INTN distroCount;
+
+void ReadConfigurationFile(const CHAR16 const *);
 
 #endif

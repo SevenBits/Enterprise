@@ -16,7 +16,7 @@
  #
 ARCH            ?= $(shell uname -m | sed s,i[3456789]86,ia32,)
 
-EFI-OBJS        = main.o menu.o utils.o distribution.o
+EFI-OBJS        = main.o menu.o utils.o distribution.o hardware.o config.o
 TARGET          = enterprise.efi
 
 EFIINC          = /usr/local/include/efi

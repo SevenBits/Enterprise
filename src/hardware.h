@@ -9,19 +9,20 @@
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * General Public License for more details.
  *
- * Copyright (C) 2013 SevenBits
+ * Copyright (C) 2017 SevenBits
  *
  */
 
 #pragma once
-#ifndef _menu_h
-#define _menu_h
-#include "main.h"
+#ifndef _hardware_h
+#define _hardware_h
 
-EFI_STATUS DisplayMenu(void);
-EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *, CHAR16 *, BOOLEAN);
-EFI_STATUS ConfigureKernel(CHAR16 *, BOOLEAN[], int);
+extern UINTN numberOfDisplayRows, numberOfDisplayColumns, highestModeNumberAvailable;
+
+EFI_STATUS key_read(UINT64 *key, BOOLEAN wait);
+EFI_STATUS SetupDisplay(VOID);
+EFI_STATUS console_text_mode(VOID);
 
 #endif
