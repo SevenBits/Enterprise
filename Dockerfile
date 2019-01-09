@@ -13,6 +13,5 @@
 # Copyright (C) 2019 SevenBits
 FROM alpine
 ADD install-deps.sh /
-COPY src/ /src
 RUN apk add --update gcc make musl-dev sudo
 RUN /install-deps.sh
