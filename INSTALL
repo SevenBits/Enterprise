@@ -1,0 +1,20 @@
+To build Enterprise on your platform, run
+
+    ./build.sh
+
+If Docker is installed and running on your build computer, the
+build will be performed inside of a Docker container. This is
+the recommended process for building because it eliminates
+problems that will likely stem from all of the different variants
+of software that exist on different computers and operating system
+variants.
+
+This script should work on both Linux and macOS. Other platforms
+are untested.
+
+If you don't have Docker installed, you will need to have GNU-EFI
+installed in order to complete the build. It is recommended that
+you use the included script install-deps.sh to do so.
+
+Once compiled. the Enterprise binary will appear in the bin/ folder
+at the root of the project.
