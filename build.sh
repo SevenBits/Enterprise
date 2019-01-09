@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 # Tool intended to help facilitate the process of booting Linux on Intel
 # Macintosh computers made by Apple from a USB stick or similar.
@@ -22,12 +22,12 @@ DOCKER_TAG=sevenbits:efi-build
 if [ $HAVE_DOCKER -eq 0 ]; then
 	echo "Found Docker at path: $(which docker)"
 	echo "Using Docker to perform build."
-	if [[ "$(docker images -q $DOCKER_TAG 2> /dev/null)" == "" ]]; then
+	if [ "$(docker images -q $DOCKER_TAG 2> /dev/null)" = "" ]; then
 		echo "Building GNU-EFI Docker image..."
 		docker build -t $DOCKER_TAG .
 	fi
 
-	docker run -it --rm -v `pwd`:/src -w /src $DOCKER_TAG ./build.sh
+	docker run -it --name enterprise-build --rm -v `pwd`:/src:delegated -w /src $DOCKER_TAG ./build.sh
 	exit $?
 fi
 
@@ -36,7 +36,7 @@ if make -C src >> /dev/null
 then
 	mkdir bin >> /dev/null 2> /dev/null # Make a new folder if we need to.
 	mv src/enterprise.efi bin/bootX64.efi
-	make -C src clean >> /dev/null 2> /dev/null
+	make -C src clean
 	make -C src/installer  >> /dev/null
 	mv src/installer/install-enterprise bin/install-enterprise
 	echo Done building!
