@@ -1,5 +1,4 @@
 language: c
-install: ./install-deps.sh
 compiler:
   - gcc
 # Change this to your needs
