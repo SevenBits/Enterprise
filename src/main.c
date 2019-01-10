@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
- * Copyright (C) 2013 SevenBits
+ * Copyright (C) 2013-2019 SevenBits
  *
  */
 
@@ -90,7 +90,7 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	
 	// Check for GRUB.
 	if (!FileExists(root_dir, L"\\efi\\boot\\boot.efi")) {
-		DisplayErrorText(L"Error: can't find GRUB bootloader!.\n");
+		DisplayErrorText(L"Error: can't find GRUB bootloader!\n");
 		can_continue = FALSE;
 	}
 	
@@ -116,6 +116,7 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 			}
 
 			BootLinuxWithOptions(L"", autobootIndex);
+			uefi_call_wrapper(BS->Stall, 1, 3 * 1000 * 1000);
 		}
 	} else {
 		DisplayErrorText(L"Cannot continue because core files are missing or damaged.\nRestarting...\n");
@@ -193,15 +194,13 @@ EFI_STATUS BootLinuxWithOptions(CHAR16 *params, UINT16 distribution) {
 	err = uefi_call_wrapper(BS->StartImage, 3, image, NULL, NULL);
 	if (EFI_ERROR(err)) {
 		DisplayErrorText(L"Error starting image: ");
-		
 		Print(L"%r\n", err);
 		uefi_call_wrapper(BS->Stall, 1, 3 * 1000 * 1000);
 		FreePool(path);
 		
 		return EFI_LOAD_ERROR;
 	}
-	
-	uefi_call_wrapper(BS->Stall, 1, 3 * 1000 * 1000);
+
 	// Should never return.
 	return EFI_SUCCESS;
 }

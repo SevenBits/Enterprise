@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * Lesser General Public License for more details.
  *
- * Copyright (C) 2013 SevenBits
+ * Copyright (C) 2013-2019 SevenBits
  *
  */
 
@@ -31,24 +31,28 @@ static UINT8 distribution_id = -1;
 
 EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 *bootOptions, BOOLEAN showBootOptions) {
 	EFI_STATUS err = EFI_SUCCESS;
-	
-	uefi_call_wrapper(ST->ConOut->SetAttribute, 2, ST->ConOut, EFI_LIGHTGRAY|EFI_BACKGROUND_BLACK); // Set the text color.
-	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut); // Clear the screen.
-	Print(banner, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH); // Print the welcome information.
+
+	// Set the text color, clear the screen, and display the
+	// welcome information. Also disable displaying the
+	// hardware text cursor.
+	uefi_call_wrapper(ST->ConOut->SetAttribute, 2, ST->ConOut, EFI_LIGHTGRAY|EFI_BACKGROUND_BLACK);
+	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut);
+	Print(banner, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	DisplayColoredText(L"\n    Boot Selector:\n");
 	Print(L"    The following distributions have been detected on this USB.\n");
 	Print(L"    Press the key corresponding to the number of the option that you want.\n\n");
 	uefi_call_wrapper(ST->ConIn->Reset, 2, ST->ConIn, FALSE);
-	uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, FALSE); // Disable display of the cursor.
+	uefi_call_wrapper(ST->ConOut->EnableCursor, 2, ST->ConOut, FALSE);
 	
 	// Print out the available Linux distributions on this USB.
-	BootableLinuxDistro *conductor = root->next; // The first item is blank. I'll fix this later.
-	INTN iteratorIndex = 0;
+	// The first item is blank. I'll fix this later.
+	BootableLinuxDistro *conductor = root->next;
+	UINTN iteratorIndex = 0;
 	while (conductor != NULL) {
 		if (conductor->bootOption->name) {
-			Print(L"    %d) %a\n", ++iteratorIndex, conductor->bootOption->name);
+			Print(L"    %d) %a\n", iteratorIndex, conductor->bootOption->name);
 		} else ++iteratorIndex;
-		
+
 		conductor = conductor->next;
 	}
 	Print(L"\n    Press any other key to reboot the system.\n");
@@ -57,9 +61,8 @@ EFI_STATUS DisplayDistributionSelector(struct BootableLinuxDistro *root, CHAR16 
 	UINT64 key;
 	err = key_read(&key, TRUE);
 	INTN index = key - '0';
-	index--; // C arrays start at index 0, but we start counting at 1, so compensate.
-	
-	if (index > iteratorIndex) {
+
+	if (index < 0 || (UINTN)index > iteratorIndex) {
 		// Reboot the system.
 		err = uefi_call_wrapper(RT->ResetSystem, 4, EfiResetCold, EFI_SUCCESS, 0, NULL);
 		
@@ -87,9 +90,9 @@ EFI_STATUS DisplayMenu(VOID) {
 		DisplayErrorText(L"Failed to allocate memory for boot options string.");
 		return EFI_OUT_OF_RESOURCES;
 	}
-	
+
 	start:
-	
+
 	/*
 	 * Give the user some information as to what they can do at this point.
 	 */
