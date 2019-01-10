@@ -142,7 +142,7 @@ static void ShowAboutPage(VOID) {
 	DisplayColoredText(L"\n\n    Enterprise ");
 	Print(L"%d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	Print(L"    EFI: %s %d\n", ST->FirmwareVendor, ST->FirmwareRevision);
-	if (version != EFI_1_10_SYSTEM_TABLE_REVISION &&
+	if (version != EFI_1_02_SYSTEM_TABLE_REVISION &&
 	    version != EFI_1_10_SYSTEM_TABLE_REVISION) {
 		Print(L"    UEFI 2.0 supported\n\n");
 	} else {
