@@ -77,14 +77,7 @@ EFI_STATUS efi_main(EFI_HANDLE image_handle, EFI_SYSTEM_TABLE *systab) {
 	
 	/* Check to make sure that we have our configuration file and GRUB bootloader. */
 	if (!FileExists(root_dir, L"\\efi\\boot\\enterprise.cfg")) {
-		// Check if we have an old-style configuration file instead.
-		if (!FileExists(root_dir, L"\\efi\\boot\\.MLUL-Live-USB")) {
-			DisplayErrorText(L"Error: can't find configuration file.\n");
-			can_continue = FALSE;
-		} else {
-			DisplayErrorText(L"Warning: old-style configuration file found, please upgrade to the new format\n");
-			ReadConfigurationFile(L"\\efi\\boot\\.MLUL-Live-USB");
-		}
+		can_continue = FALSE;
 	} else {
 		ReadConfigurationFile(L"\\efi\\boot\\enterprise.cfg");
 	}
