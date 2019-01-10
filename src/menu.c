@@ -132,14 +132,15 @@ EFI_STATUS DisplayMenu(VOID) {
 }
 
 static void ShowAboutPage(VOID) {
-	UINT64 sig = ST->Hdr.Signature;
+	UINT64 version = ST->FirmwareRevision;
 	uefi_call_wrapper(ST->ConOut->ClearScreen, 1, ST->ConOut); // Clear the screen.
 	
 	// Print the Enterprise info and the system firmware version.
 	DisplayColoredText(L"\n\n    Enterprise ");
 	Print(L"%d.%d.%d\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 	Print(L"    EFI: %s %d\n", ST->FirmwareVendor, ST->FirmwareRevision);
-	if ((sig & EFI_2_20_SYSTEM_TABLE_REVISION) || (sig & EFI_2_10_SYSTEM_TABLE_REVISION) || (sig & EFI_2_00_SYSTEM_TABLE_REVISION)) {
+	if (version != EFI_1_10_SYSTEM_TABLE_REVISION &&
+	    version != EFI_1_10_SYSTEM_TABLE_REVISION) {
 		Print(L"    UEFI 2.0 supported\n\n");
 	} else {
 		DisplayErrorText(L"    UEFI 2.0 not supported!\n\n");
