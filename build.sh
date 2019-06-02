@@ -32,9 +32,9 @@ if [ $HAVE_DOCKER -eq 0 ]; then
 fi
 
 # If Docker is not installed, then build the image as usual.
-if make -C src >> /dev/null
+if make -C src >/dev/null
 then
-	mkdir bin >> /dev/null 2> /dev/null # Make a new folder if we need to.
+	mkdir bin >/dev/null 2>&1
 	mv src/enterprise.efi bin/bootX64.efi
 	make -C src clean
 	echo Done building!
